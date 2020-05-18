@@ -1,0 +1,37 @@
+requires:
+    min-version: 6.0.0
+    pcap: false
+
+args:
+    - --engine-analysis
+
+exit-code: 1
+
+checks:
+    - shell:
+        args: grep "SC_ERR_INVALID_SIGNATURE" suricata.log | wc -l | xargs
+        expect: 12
+
+    - shell:
+        args: grep "bsize match impossible.*bsize value.*2, content len.*14" suricata.log | wc -l | xargs
+        expect: 1
+
+    - shell:
+        args: grep "bsize match impossible.*bsize value.*13, content len.*14" suricata.log | wc -l | xargs
+        expect: 1
+
+    - shell:
+        args: grep "bsize match impossible.*bsize value.*10, content len.*14" suricata.log | wc -l | xargs
+        expect: 1
+
+    - shell:
+        args: grep "bsize match impossible.*bsize value.*3, content len.*27" suricata.log | wc -l | xargs
+        expect: 1
+
+    - shell:
+        args: grep "bsize match impossible.*bsize value.*3, content len.*6" suricata.log | wc -l | xargs
+        expect: 1
+
+    - shell:
+        args: grep "bsize match impossible.*bsize value.*1, content len.*2" suricata.log | wc -l | xargs
+        expect: 1
