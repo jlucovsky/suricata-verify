@@ -1,7 +1,7 @@
 exit-code: 0
 
 command: |
-  ${SRCDIR}/src/suricata --set classification-file="${SRCDIR}/etc/classification.config"    \
+  ${SURICATA_BIN} --set classification-file="${SRCDIR}/etc/classification.config"    \
       --set reference-config-file="${SRCDIR}/etc/reference.config" -l ${OUTPUT_DIR}         \
       --set threshold-file="${TEST_DIR}/threshold.config"                                   \
       -c "${SRCDIR}/suricata.yaml" -r ${TEST_DIR}/input.pcap -S ${TEST_DIR}/test.rules      \

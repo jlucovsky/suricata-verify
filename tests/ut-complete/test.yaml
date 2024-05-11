@@ -7,5 +7,5 @@ requires:
 exit-code: 0
 
 command: |
-  ASAN_OPTIONS=detect_leaks=0 ${SRCDIR}/src/suricata -u -l ${OUTPUT_DIR}
+  ASAN_OPTIONS=detect_leaks=0 ${SURICATA_BIN} -u -l ${OUTPUT_DIR}
 

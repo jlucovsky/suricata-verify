@@ -93,7 +93,7 @@ args:
 # be broken up over multiple lines for readability. If providing the command
 # all arguments must be provided as part of the command.
 command: |
-  ${SRCDIR}/src/suricata -T -c ${TEST_DIR}/suricata.yaml -vvv \
+  ${SURICATA_BIN}-T -c ${TEST_DIR}/suricata.yaml -vvv \
       -l ${TEST_DIR}/output --set default-rule-path="${TEST_DIR}"
 
 # Retry a test 3 more times on failure. Some tests are subject to

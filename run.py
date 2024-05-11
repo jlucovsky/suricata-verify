@@ -575,7 +575,7 @@ class FilterCheck:
 class TestRunner:
 
     def __init__(self, cwd, directory, outdir, suricata_config, verbose=False,
-                 force=False, quiet=False):
+                 force=False, quiet=False, suricata_bin='src/suricata'):
         self.cwd = cwd
         self.directory = directory
         self.suricata_config = suricata_config
@@ -584,6 +584,7 @@ class TestRunner:
         self.force = force
         self.output = outdir
         self.quiet = quiet
+        self.suricata_bin = suricata_bin
 
         # The name is just the directory name.
         self.name = os.path.basename(self.directory)
@@ -680,6 +681,7 @@ class TestRunner:
         env = os.environ.copy()
         env["SRCDIR"] = self.cwd
         env["TZ"] = "UTC"
+        env["SURICATA_BIN"] = suricata_bin
         env["TEST_DIR"] = self.directory
         env["OUTPUT_DIR"] = self.output
         if not "ASAN_OPTIONS" in env:
@@ -870,7 +872,7 @@ class TestRunner:
             args += [ "valgrind", "-v", "--error-exitcode=255", suppression_opt ]
 
         args += [
-            os.path.join(self.cwd, suricata_bin),
+            os.path.join(self.cwd, suricata_bin) if suricata_bin[0] != '/' else suricata_bin,
         ]
 
         # Load args from config file.
@@ -997,7 +999,7 @@ def run_test(dirpath, args, cwd, suricata_config):
 
     test_runner = TestRunner(
         cwd, dirpath, outdir, suricata_config, args.verbose, args.force,
-        args.quiet)
+        args.quiet, args.suricata_bin)
     try:
         results = test_runner.run(outdir)
         if results["failure"] > 0:
@@ -1061,6 +1063,7 @@ def build_eve_validator():
 def main():
     global TOPDIR
     global args
+    global suricata_bin
 
     if not check_deps():
         return 1
@@ -1081,6 +1084,8 @@ def main():
                         help="Outputs to custom directory")
     parser.add_argument("--valgrind", dest="valgrind", action="store_true",
                         help="Run tests in with valgrind")
+    parser.add_argument("--suricata-bin", type=str, default="src/suricata",
+                        help="Use installed suri")
     parser.add_argument("--self-test", action="store_true",
                         help="Run self tests")
     parser.add_argument("--debug-failed", dest="debugfailed", action="store_true",
@@ -1098,15 +1103,18 @@ def main():
         return unittest.main(argv=[sys.argv[0]])
 
     TOPDIR = os.path.abspath(os.path.dirname(sys.argv[0]))
-
     # Get the current working directory, which should be the top
     # suricata source directory.
     cwd = os.getcwd()
+
     if not (os.path.exists(suricata_yaml) and
-            os.path.exists(suricata_bin)):
+            os.path.exists(args.suricata_bin)) or not (os.path.exists(args.suricata_bin)):
         print("error: this is not a suricata source directory or " +
-              "suricata is not built")
+              "the suricata binary cannot be located or is not built")
         return 1
+
+    if args.suricata_bin:
+        suricata_bin = args.suricata_bin
 
     global VALIDATE_EVE
     if not WIN32 and not args.no_validation:

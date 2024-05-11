@@ -4,7 +4,7 @@ requires:
     - HAVE_LIBJANSSON
 
 command: |
-  ${SRCDIR}/src/suricata --set classification-file="${SRCDIR}/classification.config"    \
+  ${SURICATA_BIN} --set classification-file="${SRCDIR}/classification.config"    \
       --set reference-config-file="${SRCDIR}/reference.config" -l ${OUTPUT_DIR}         \
       -c suricata.yaml -r ${TEST_DIR}/input.pcap -S ${TEST_DIR}/iprep.rules             \
       --data-dir="${OUTPUT_DIR}"                                                        \

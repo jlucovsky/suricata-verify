@@ -4,7 +4,7 @@ requires:
 # Override the default command. This is also an example of how it can
 # be broken up over multiple lines for readability.
 command: |
-  ${SRCDIR}/src/suricata -T -c ${TEST_DIR}/suricata.yaml -vvv \
+  ${SURICATA_BIN} -T -c ${TEST_DIR}/suricata.yaml -vvv \
       -l ${OUTPUT_DIR} --set default-rule-path="${TEST_DIR}" \
       --set reference-config-file="${SRCDIR}/etc/reference.config" \
       --set classification-file="${SRCDIR}/etc/classification.config"
