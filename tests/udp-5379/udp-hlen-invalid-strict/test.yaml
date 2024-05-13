@@ -4,7 +4,7 @@ command: |
   ${SURICATA_BIN} --set classification-file="${SRCDIR}/etc/classification.config"    \
       --set reference-config-file="${SRCDIR}/etc/reference.config" -l ${OUTPUT_DIR}         \
       --set threshold-file="${TEST_DIR}/threshold.config"                                   \
-      -c "${SRCDIR}/suricata.yaml" -r ${TEST_DIR}/input.pcap -S ${TEST_DIR}/test.rules      \
+      -c "${SURICATA_YAML}" -r ${TEST_DIR}/input.pcap -S ${TEST_DIR}/test.rules      \
       --strict-rule-keywords=all
 
 checks:

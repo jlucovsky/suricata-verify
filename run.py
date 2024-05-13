@@ -56,6 +56,8 @@ if os.path.exists("src\\suricata.exe"):
 else:
     suricata_bin = "./src/suricata"
 
+suricata_config_dir= os.getcwd()
+
 PROC_TIMEOUT=300
 
 if LINUX:
@@ -575,7 +577,7 @@ class FilterCheck:
 class TestRunner:
 
     def __init__(self, cwd, directory, outdir, suricata_config, verbose=False,
-                 force=False, quiet=False, suricata_bin='src/suricata'):
+                 force=False, quiet=False):
         self.cwd = cwd
         self.directory = directory
         self.suricata_config = suricata_config
@@ -584,7 +586,6 @@ class TestRunner:
         self.force = force
         self.output = outdir
         self.quiet = quiet
-        self.suricata_bin = suricata_bin
 
         # The name is just the directory name.
         self.name = os.path.basename(self.directory)
@@ -682,6 +683,7 @@ class TestRunner:
         env["SRCDIR"] = self.cwd
         env["TZ"] = "UTC"
         env["SURICATA_BIN"] = suricata_bin
+        env["SURICATA_YAML"] = os.path.join(suricata_config_dir, "suricata.yaml")
         env["TEST_DIR"] = self.directory
         env["OUTPUT_DIR"] = self.output
         if not "ASAN_OPTIONS" in env:
@@ -952,9 +954,14 @@ class TestRunner:
     def get_suricata_yaml_path(self):
         """Return the path to the suricata.yaml that will be used for this
         test."""
+
+        # Use the config file from the test
         if os.path.exists(os.path.join(self.directory, "suricata.yaml")):
             return os.path.join(self.directory, "suricata.yaml")
-        return os.path.join(self.cwd, "suricata.yaml")
+
+        # Use the config file from the source directory or location
+        # of the configuration file specified on the command line
+        return os.path.join(suricata_config_dir, "suricata.yaml")
 
     def start_reader(self, input, output):
         t = threading.Thread(
@@ -999,7 +1006,7 @@ def run_test(dirpath, args, cwd, suricata_config):
 
     test_runner = TestRunner(
         cwd, dirpath, outdir, suricata_config, args.verbose, args.force,
-        args.quiet, args.suricata_bin)
+        args.quiet)
     try:
         results = test_runner.run(outdir)
         if results["failure"] > 0:
@@ -1064,6 +1071,7 @@ def main():
     global TOPDIR
     global args
     global suricata_bin
+    global suricata_config_dir
 
     if not check_deps():
         return 1
@@ -1084,8 +1092,10 @@ def main():
                         help="Outputs to custom directory")
     parser.add_argument("--valgrind", dest="valgrind", action="store_true",
                         help="Run tests in with valgrind")
-    parser.add_argument("--suricata-bin", type=str, default="src/suricata",
-                        help="Use installed suri")
+    parser.add_argument("--suricata-bin", type=str, default=None,
+                        help="Suricata binary location")
+    parser.add_argument("--suricata-yaml", type=str, default=None,
+                        help="Suricata configuration file location")
     parser.add_argument("--self-test", action="store_true",
                         help="Run self tests")
     parser.add_argument("--debug-failed", dest="debugfailed", action="store_true",
@@ -1107,14 +1117,19 @@ def main():
     # suricata source directory.
     cwd = os.getcwd()
 
-    if not (os.path.exists(suricata_yaml) and
-            os.path.exists(args.suricata_bin)) or not (os.path.exists(args.suricata_bin)):
-        print("error: this is not a suricata source directory or " +
-              "the suricata binary cannot be located or is not built")
-        return 1
+    if args.suricata_yaml:
+        suricata_config_dir = os.path.dirname(args.suricata_yaml)
+    else:
+        suricata_config_dir = cwd
 
     if args.suricata_bin:
         suricata_bin = args.suricata_bin
+
+    if not (os.path.exists(os.path.join(suricata_config_dir,suricata_yaml)) and
+            os.path.exists(suricata_bin)) or not (os.path.exists(suricata_bin)):
+        print("error: this is not a suricata source directory or " +
+              "suricata is not built")
+        return 1
 
     global VALIDATE_EVE
     if not WIN32 and not args.no_validation:
