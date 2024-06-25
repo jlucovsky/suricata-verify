@@ -21,4 +21,4 @@ checks:
       count: 0
       match:
          event_type: alert
-         alert.signature_id: 2
+         alert.signature_id: 3
