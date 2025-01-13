@@ -1,0 +1,4 @@
+alert http any any -> any any (msg:"entropy simple test"; \
+    file.data; \
+    entropy: value 4, oper >=; \
+    sid:1;)
