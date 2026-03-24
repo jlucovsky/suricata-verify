@@ -1,0 +1,14 @@
+requires:
+  min-version: 9
+
+args:
+  - --runmode=single
+
+checks:
+  - filter:
+      count: 10
+      match:
+        event_type: alert
+
+  - shell:
+      args: python3 -c "import json,sys;[sys.exit(0) for l in open('eve.json') for e in [json.loads(l)] if e.get('event_type')=='stats' and e['stats']['detect']['thresholds']['max_bucket_depth']>0 and e['stats']['detect']['thresholds']['avg_bucket_depth']>0];sys.exit(1)"
