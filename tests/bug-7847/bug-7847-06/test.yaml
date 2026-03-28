@@ -1,0 +1,11 @@
+min-version: 9
+
+pcap: ../bug-7847-01/input.pcap
+args:
+  - -k none
+checks:
+  - filter:
+      count: 1
+      match:
+        event_type: alert
+        alert.signature_id: 1
