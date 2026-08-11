@@ -1,0 +1,47 @@
+requires:
+  min-version: 9
+
+args:
+  - -k none
+  - --runmode=single
+  - --set app-layer.protocols.ftp.memcap=2048
+
+checks:
+  # The banner fits under the memcap and is recorded.
+  - filter:
+      count: 1
+      match:
+        event_type: ftp
+        ftp.completion_code[0]: "220"
+
+  # The reply to USER is ~3000 bytes, which does not fit. The command is
+  # still logged, without the response.
+  - filter:
+      count: 1
+      match:
+        event_type: ftp
+        ftp.command: "USER"
+        ftp.command_data: "user"
+        not-has-key: [ftp.completion_code, ftp.reply]
+
+  # Refusing the oversized response does not wedge the parser: the next
+  # exchanges are recorded as usual.
+  - filter:
+      count: 1
+      match:
+        event_type: ftp
+        ftp.command: "PASS"
+        ftp.completion_code[0]: "230"
+
+  - filter:
+      count: 1
+      match:
+        event_type: ftp
+        ftp.command: "QUIT"
+        ftp.completion_code[0]: "221"
+
+  # The memcap was consulted once and denied once, and nothing that was
+  # charged to memuse was left behind.
+  - stats:
+      ftp.memcap: 1
+      ftp.memuse: 0

@@ -1,0 +1,30 @@
+requires:
+  min-version: 9
+
+pcap: ../ftp-memcap-response-line/ftp-memcap-response-line.pcap
+
+args:
+  - -k none
+  - --runmode=single
+  - --set app-layer.protocols.ftp.memcap=0
+
+checks:
+  # With the memcap unlimited the oversized response is recorded, so the new
+  # check does not fire when there is no limit to enforce.
+  - filter:
+      count: 1
+      match:
+        event_type: ftp
+        ftp.command: "USER"
+        ftp.completion_code[0]: "331"
+        ftp.reply[0].__len: 3000
+
+  - filter:
+      count: 4
+      match:
+        event_type: ftp
+        has-key: [ftp.completion_code]
+
+  - stats:
+      ftp.memcap: 0
+      ftp.memuse: 0
