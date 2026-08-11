@@ -1,0 +1,67 @@
+requires:
+  min-version: 9
+
+args:
+  - -k none
+  - --runmode=single
+  - --set app-layer.protocols.ftp.max-line-length=40
+
+checks:
+  # Trailing spaces are not part of the command data.
+  - filter:
+      count: 1
+      match:
+        event_type: ftp
+        ftp.command: "USER"
+        ftp.command_data: "user"
+        ftp.command_truncated: false
+
+  # Neither are trailing tabs.
+  - filter:
+      count: 1
+      match:
+        event_type: ftp
+        ftp.command: "PASS"
+        ftp.command_data: "password"
+        ftp.command_truncated: false
+
+  # A command with no data at all, just a trailing space.
+  - filter:
+      count: 1
+      match:
+        event_type: ftp
+        ftp.command: "SYST"
+        not-has-key: [ftp.command_data]
+
+  # A command with nothing to trim behaves as before.
+  - filter:
+      count: 1
+      match:
+        event_type: ftp
+        ftp.command: "TYPE"
+        ftp.command_data: "I"
+        ftp.command_truncated: false
+
+  # The RETR line is longer than the 40 byte limit and the cut lands inside a
+  # run of spaces, so the truncated line is trimmed as well.
+  - filter:
+      count: 1
+      match:
+        event_type: ftp
+        ftp.command: "RETR"
+        ftp.command_data: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        ftp.command_data.__len: 30
+        ftp.command_truncated: true
+
+  - filter:
+      count: 1
+      match:
+        event_type: anomaly
+        anomaly.event: request_command_too_long
+
+  # Each command line is charged to and credited back from ftp.memuse in
+  # full, so nothing is left over once the flow is gone. Before the fix this
+  # pcap leaves 16 bytes behind: 3 + 2 + 1 + 0 + 5 + 5.
+  - stats:
+      ftp.memuse: 0
+      ftp.memcap: 0
