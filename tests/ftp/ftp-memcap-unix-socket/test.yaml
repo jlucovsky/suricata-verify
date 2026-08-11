@@ -1,0 +1,36 @@
+requires:
+  min-version: 9
+  pcap: false
+
+args:
+  - --set app-layer.protocols.ftp.memcap=10mb
+
+unix-commands:
+  - "memcap-show ftp"
+  - "memcap-set ftp 32mb"
+  - "memcap-show ftp"
+  - "memcap-set ftp 0"
+  - "memcap-show ftp"
+
+# The responses are checked with grep: sc.json mixes object and string
+# messages, which the JSON filter checks cannot walk.
+checks:
+  # Every command, including setting the unlimited value, is accepted.
+  - shell:
+      args: grep -c '"return":"OK"' sc.json | xargs
+      expect: 5
+
+  # The first show reports the configured memcap, not the memcap counter.
+  - shell:
+      args: grep -c '{"message":{"value":"10mb"},"return":"OK"}' sc.json | xargs
+      expect: 1
+
+  # The value set at runtime is the one that comes back.
+  - shell:
+      args: grep -c '{"message":{"value":"32mb"},"return":"OK"}' sc.json | xargs
+      expect: 1
+
+  # 0 means unlimited, as it does for the other memcaps.
+  - shell:
+      args: grep -c '{"message":{"value":"unlimited"},"return":"OK"}' sc.json | xargs
+      expect: 1
