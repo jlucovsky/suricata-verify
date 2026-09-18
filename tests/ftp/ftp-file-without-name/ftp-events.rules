@@ -1,0 +1,1 @@
+alert ftp any any -> any any (msg:"SURICATA FTP file without name"; flow:to_server; app-layer-event:ftp.file_without_name; classtype:protocol-command-decode; sid:2232004; rev:1;)

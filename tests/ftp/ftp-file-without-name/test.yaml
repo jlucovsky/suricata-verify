@@ -1,0 +1,27 @@
+checks:
+  # Anomaly event for RETR with no filename argument.
+  - filter:
+      requires:
+        min-version: 9.0
+      count: 1
+      match:
+        event_type: anomaly
+        anomaly.event: file_without_name
+
+  # Alert on the event.
+  - filter:
+      requires:
+        min-version: 9.0
+      count: 1
+      match:
+        event_type: alert
+        alert.signature_id: 2232004
+
+  # RETR transaction logged with no command_data.
+  - filter:
+      requires:
+        min-version: 9.0
+      count: 1
+      match:
+        event_type: ftp
+        ftp.command: RETR

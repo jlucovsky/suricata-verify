@@ -1,0 +1,10 @@
+checks:
+  # With max-tx: 3, pipelining 4 requests triggers too_many_transactions on the
+  # two oldest incomplete transactions (USER and NOOP#1 both get the event).
+  - filter:
+      requires:
+        min-version: 9.0
+      count: 2
+      match:
+        event_type: anomaly
+        anomaly.event: too_many_transactions
