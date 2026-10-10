@@ -1,0 +1,101 @@
+requires:
+  min-version: 9
+
+args:
+  - --runmode=single
+
+checks:
+  - filter:
+      count: 9
+      match:
+        event_type: ftp
+
+  - filter:
+      count: 1
+      match:
+        event_type: ftp
+        ftp.command: USER
+        ftp.completion_code: ['331']
+        ftp.reply: ["Passw\ufffdrd required"]
+
+  - filter:
+      count: 1
+      match:
+        event_type: ftp
+        ftp.command: PASS
+        ftp.completion_code: ['230']
+        ftp.reply: ["W\u00e9lcome \U0001F30D"]
+
+  - filter:
+      count: 1
+      match:
+        event_type: ftp
+        ftp.command: SYST
+        ftp.completion_code: ['215']
+        ftp.reply: ["\ufffd\ufffd"]
+
+  - filter:
+      count: 1
+      match:
+        event_type: ftp
+        ftp.command: PWD
+        ftp.completion_code: ['257']
+        ftp.reply: ["\"/\ufffd\" is cwd"]
+
+  - filter:
+      count: 1
+      match:
+        event_type: ftp
+        ftp.command: NOOP
+        ftp.reply: ["2\ufffd0 bad code"]
+        not-has-key: ftp.completion_code
+
+  - filter:
+      count: 1
+      match:
+        event_type: ftp
+        ftp.command: HELP
+        ftp.completion_code: ['214']
+        ftp.reply: ["\ufffd\ufffd\ufffd \ufffd\ufffd \ufffd\ufffd\ufffd\ufffd"]
+
+  - filter:
+      count: 1
+      match:
+        event_type: ftp
+        ftp.command: STAT
+        not-has-key: ftp.completion_code
+
+  - filter:
+      count: 0
+      match:
+        event_type: ftp
+        ftp.command: STAT
+        has-key: ftp.reply
+
+  - filter:
+      count: 1
+      match:
+        event_type: ftp
+        ftp.command: QUIT
+        ftp.completion_code: ['221']
+        ftp.reply: ["bye"]
+
+  - filter:
+      count: 1
+      match:
+        event_type: alert
+        alert.signature_id: 1
+        ftp.command: SYST
+
+  - filter:
+      count: 1
+      match:
+        event_type: alert
+        alert.signature_id: 2
+        ftp.command: NOOP
+
+  - filter:
+      count: 1
+      match:
+        event_type: alert
+        alert.signature_id: 2

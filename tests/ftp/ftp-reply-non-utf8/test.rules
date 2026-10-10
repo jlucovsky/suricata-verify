@@ -1,0 +1,2 @@
+alert ftp any any -> any any (msg:"two invalid bytes stored as six"; ftp.reply; content:"|EF BF BD EF BF BD|"; bsize:6; sid:1;)
+alert ftp any any -> any any (msg:"reply without code has empty code buffer"; ftp.completion_code; bsize:0; sid:2;)
