@@ -1,0 +1,77 @@
+requires:
+  min-version: 9
+
+args:
+  - --runmode=single
+
+checks:
+  - filter:
+      count: 1
+      match:
+        event_type: ftp
+        ftp.command: USER
+        ftp.reply_truncated: false
+        not-has-key: ftp.completion_code
+
+  - filter:
+      count: 1
+      match:
+        event_type: ftp
+        ftp.command: PASS
+        ftp.reply_truncated: true
+        not-has-key: ftp.completion_code
+
+  - filter:
+      count: 1
+      match:
+        event_type: ftp
+        ftp.command: SYST
+        ftp.reply_truncated: true
+        not-has-key: ftp.completion_code
+
+  - filter:
+      count: 1
+      match:
+        event_type: ftp
+        ftp.command: PWD
+        ftp.reply_truncated: true
+        not-has-key: ftp.completion_code
+
+  - filter:
+      count: 3
+      match:
+        event_type: anomaly
+        anomaly.event: response_command_too_long
+
+  - filter:
+      count: 1
+      match:
+        event_type: alert
+        alert.signature_id: 1
+        ftp.command: USER
+
+  - filter:
+      count: 1
+      match:
+        event_type: alert
+        alert.signature_id: 2
+        ftp.command: PASS
+
+  - filter:
+      count: 1
+      match:
+        event_type: alert
+        alert.signature_id: 3
+        ftp.command: SYST
+
+  - filter:
+      count: 1
+      match:
+        event_type: alert
+        alert.signature_id: 4
+        ftp.command: PWD
+
+  - filter:
+      count: 4
+      match:
+        event_type: alert

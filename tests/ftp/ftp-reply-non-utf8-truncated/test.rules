@@ -1,0 +1,4 @@
+alert ftp any any -> any any (msg:"4093 invalid bytes, not truncated"; ftp.reply; content:"|EF BF BD|"; startswith; bsize:12279; sid:1;)
+alert ftp any any -> any any (msg:"4094 invalid bytes, flagged truncated"; ftp.reply; content:"|EF BF BD|"; startswith; bsize:12282; sid:2;)
+alert ftp any any -> any any (msg:"4100 invalid bytes, cut to 4096"; ftp.reply; content:"|EF BF BD|"; startswith; bsize:12288; sid:3;)
+alert ftp any any -> any any (msg:"cut splits a 2-byte sequence"; ftp.reply; content:"a|EF BF BD|"; endswith; bsize:4098; sid:4;)
