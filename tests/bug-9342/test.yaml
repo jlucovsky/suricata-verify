@@ -1,0 +1,15 @@
+requires:
+  min-version: 9.0
+
+pcap: ../nfs3-lookup-overclaim-skip/input.pcap
+
+args:
+  - --runmode=single
+  - -k none
+
+checks:
+  - filter:
+      count: 1
+      match:
+        event_type: stats
+        stats.tcp.reassembly_memuse.__lt: 40000

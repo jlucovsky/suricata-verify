@@ -1,0 +1,21 @@
+%YAML 1.1
+---
+
+stats:
+  enabled: yes
+
+outputs:
+  - eve-log:
+      enabled: yes
+      filename: eve.json
+      types:
+        - stats
+  - pcap-log:
+      enabled: yes
+      filename: log.pcap
+      mode: normal
+      conditional: alerts
+
+stream:
+  reassembly:
+    segment-prealloc: 0
